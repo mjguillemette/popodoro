@@ -1,29 +1,41 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { useTimer } from '@/hooks/useTimer';
+import { SessionConfig, TimerStatus } from '@/types/timer';
 
-export const TimerDisplay = () => {
-  const { formattedTime, currentSession, progress, status } = useTimer();
+interface TimerDisplayProps {
+  formattedTime: string;
+  currentSession: SessionConfig;
+  progress: number;
+  status: TimerStatus;
+}
+
+export const TimerDisplay = ({
+  formattedTime,
+  currentSession,
+  progress,
+  status,
+}: TimerDisplayProps) => {
 
   return (
-    <div className="flex flex-col items-center space-y-6">
+    <div className="flex flex-col items-center space-y-8">
       {/* Session Type */}
       <motion.div
-        initial={{ opacity: 0, y: -20 }}
+        initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
         className="text-center"
       >
-        <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200">
+        <h2 className="text-lg font-medium text-neutral-700 dark:text-neutral-300 tracking-tight">
           {currentSession.type.charAt(0).toUpperCase() + currentSession.type.slice(1).replace('-', ' ')}
         </h2>
-        <p className="text-gray-600 dark:text-gray-400 mt-1">
+        <p className="text-neutral-500 dark:text-neutral-400 mt-2 text-sm leading-relaxed">
           {currentSession.description}
         </p>
       </motion.div>
 
       {/* Timer Circle */}
-      <div className="relative w-64 h-64">
+      <div className="relative w-56 h-56">
         {/* Background Circle */}
         <svg
           className="w-full h-full transform -rotate-90"
@@ -34,49 +46,41 @@ export const TimerDisplay = () => {
             cy="50"
             r="45"
             stroke="currentColor"
-            strokeWidth="2"
+            strokeWidth="1.5"
             fill="none"
-            className="text-gray-200 dark:text-gray-700"
+            className="text-neutral-200 dark:text-neutral-700"
           />
           {/* Progress Circle */}
-          <motion.circle
+          <circle
             cx="50"
             cy="50"
             r="45"
-            stroke={currentSession.color}
-            strokeWidth="3"
+            stroke="rgb(115 115 115)"
+            strokeWidth="1.5"
             fill="none"
             strokeLinecap="round"
             strokeDasharray={283} // 2 * π * 45
             strokeDashoffset={283 - (283 * progress) / 100}
-            initial={{ strokeDashoffset: 283 }}
-            animate={{ strokeDashoffset: 283 - (283 * progress) / 100 }}
-            transition={{ duration: 0.5, ease: 'easeInOut' }}
-            className="drop-shadow-sm"
+            className="transition-all duration-300 ease-out"
           />
         </svg>
 
         {/* Timer Text */}
         <div className="absolute inset-0 flex items-center justify-center">
-          <motion.div
-            key={formattedTime}
-            initial={{ scale: 0.9, opacity: 0.7 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="text-center"
-          >
-            <div className="text-6xl font-mono font-bold text-gray-800 dark:text-gray-200">
+          <div className="text-center">
+            <div className="text-5xl font-mono font-normal text-neutral-800 dark:text-neutral-200 tabular-nums">
               {formattedTime}
             </div>
-            <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            <div className="text-xs text-neutral-500 dark:text-neutral-400 mt-3">
               {status === 'running' ? 'Focus time' : status === 'paused' ? 'Paused' : 'Ready to start'}
             </div>
-          </motion.div>
+          </div>
         </div>
       </div>
 
       {/* Session Progress Indicator */}
-      <div className="flex items-center space-x-2">
-        <div className="text-sm text-gray-500 dark:text-gray-400">
+      <div className="flex items-center">
+        <div className="text-xs text-neutral-500 dark:text-neutral-400 tabular-nums">
           {Math.round(progress)}% complete
         </div>
       </div>

@@ -3,22 +3,34 @@ import { useTimerStore } from '@/store/timer';
 
 export const useTimer = () => {
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const isRunningRef = useRef(false);
+  const store = useTimerStore();
   const {
     status,
     timeRemaining,
     currentSession,
-    tick,
     startTimer,
     pauseTimer,
     resetTimer,
     skipSession,
-  } = useTimerStore();
+  } = store;
 
   // Start/stop the timer interval based on status
   useEffect(() => {
-    if (status === 'running') {
-      intervalRef.current = setInterval(tick, 1000);
-    } else {
+    if (status === 'running' && !isRunningRef.current) {
+      isRunningRef.current = true;
+      
+      // Clear any existing interval first
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+      
+      intervalRef.current = setInterval(() => {
+        useTimerStore.getState().tick();
+      }, 1000);
+    } else if (status !== 'running' && isRunningRef.current) {
+      isRunningRef.current = false;
+      
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
@@ -27,11 +39,13 @@ export const useTimer = () => {
 
     // Cleanup on unmount
     return () => {
+      isRunningRef.current = false;
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
+        intervalRef.current = null;
       }
     };
-  }, [status, tick]);
+  }, [status]);
 
   const formatTime = (seconds: number): string => {
     const minutes = Math.floor(seconds / 60);

@@ -1,23 +1,38 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { useTimer } from '@/hooks/useTimer';
+import { TimerStatus } from '@/types/timer';
 import { useAudio } from '@/hooks/useAudio';
+import { useTodos } from '@/hooks/useTodos';
 import { Play, Pause, RotateCcw, SkipForward } from 'lucide-react';
 
-export const TimerControls = () => {
-  const { status, startTimer, pauseTimer, resetTimer, skipSession } = useTimer();
+interface TimerControlsProps {
+  status: TimerStatus;
+  startTimer: () => void;
+  pauseTimer: () => void;
+  resetTimer: () => void;
+  skipSession: () => void;
+}
+
+export const TimerControls = ({
+  status,
+  startTimer,
+  pauseTimer,
+  resetTimer,
+  skipSession,
+}: TimerControlsProps) => {
   const { playClick } = useAudio();
+  const { currentViableTask, selectRandomTask } = useTodos();
 
   const buttonVariants = {
-    hover: { scale: 1.05 },
-    tap: { scale: 0.95 },
+    hover: { scale: 1.02 },
+    tap: { scale: 0.98 },
   };
 
-  const iconSize = 24;
+  const iconSize = 20;
 
   return (
-    <div className="flex items-center justify-center space-x-4">
+    <div className="flex items-center justify-center space-x-3">
       {/* Play/Pause Button */}
       <motion.button
         variants={buttonVariants}
@@ -28,15 +43,19 @@ export const TimerControls = () => {
           if (status === 'running') {
             pauseTimer();
           } else {
+            // Auto-select a task if none is selected when starting timer
+            if (!currentViableTask) {
+              selectRandomTask();
+            }
             startTimer();
           }
         }}
-        className="flex items-center justify-center w-16 h-16 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-lg transition-colors duration-200"
+        className="flex items-center justify-center w-14 h-14 bg-neutral-800 hover:bg-neutral-700 dark:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-50 dark:text-neutral-800 rounded-full transition-colors duration-300"
       >
         {status === 'running' ? (
           <Pause size={iconSize} />
         ) : (
-          <Play size={iconSize} className="ml-1" />
+          <Play size={iconSize} className="ml-0.5" />
         )}
       </motion.button>
 
@@ -49,9 +68,9 @@ export const TimerControls = () => {
           playClick();
           resetTimer();
         }}
-        className="flex items-center justify-center w-12 h-12 bg-gray-500 hover:bg-gray-600 text-white rounded-full shadow-md transition-colors duration-200"
+        className="flex items-center justify-center w-10 h-10 bg-neutral-200 hover:bg-neutral-300 dark:bg-neutral-700 dark:hover:bg-neutral-600 text-neutral-600 dark:text-neutral-300 rounded-full transition-colors duration-300"
       >
-        <RotateCcw size={18} />
+        <RotateCcw size={16} />
       </motion.button>
 
       {/* Skip Button */}
@@ -63,9 +82,9 @@ export const TimerControls = () => {
           playClick();
           skipSession();
         }}
-        className="flex items-center justify-center w-12 h-12 bg-orange-500 hover:bg-orange-600 text-white rounded-full shadow-md transition-colors duration-200"
+        className="flex items-center justify-center w-10 h-10 bg-neutral-200 hover:bg-neutral-300 dark:bg-neutral-700 dark:hover:bg-neutral-600 text-neutral-600 dark:text-neutral-300 rounded-full transition-colors duration-300"
       >
-        <SkipForward size={18} />
+        <SkipForward size={16} />
       </motion.button>
     </div>
   );
